@@ -1,0 +1,51 @@
+:root {
+  --background-color: #1a1a1a; /* Deep charcoal */
+  --text-color: #00e5e5;       /* Cool teal/cyan */
+  --accent-color: #ff9900;     /* Warning amber/orange */
+  --border-color: rgba(0, 229, 229, 0.3);
+  --font-family: 'Share Tech Mono', monospace;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Styles for the main interface */
+.omega-interface {
+  width: 90%;
+  max-width: 800px;
+  height: 85vh;
+  border: 1px solid var(--border-color);
+  background: radial-gradient(circle, rgba(0, 43, 43, 0.2) 0%, rgba(26, 26, 26, 0.1) 70%);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.omega-header {
+  text-align: center;
+  color: var(--accent-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  letter-spacing: 3px;
+}
+
+.omega-content {
+  flex-grow: 1;
+  font-size: 1.1rem;
+}
