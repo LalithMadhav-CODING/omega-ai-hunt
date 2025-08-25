@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 
+type Message = {
+    role: 'user' | 'bot';
+    content: string;
+};
+
 const OmegaInterface = () => {
-    // NOTE: This will be connected to the Gemini API in the next PR.
-    // For now, it just echoes the user's message.
-    const [messages, setMessages] = useState([
+    const [messages, setMessages] = useState<Message[]>([
         { role: 'bot', content: 'STATUS: SECURE CONNECTION ESTABLISHED.' },
         { role: 'bot', content: 'OMEGA INTERFACE ONLINE. AWAITING DIRECTIVE...' }
     ]);
@@ -13,19 +16,36 @@ const OmegaInterface = () => {
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
 
-        const newMessages = [...messages, { role: 'user', content: input }];
-        setMessages(newMessages);
+        const userMessage: Message = { role: 'user', content: input };
+        // Add the user's message to the chat immediately
+        setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
 
-        // Placeholder for backend call
-        setTimeout(() => {
-            setMessages([
-                ...newMessages,
-                { role: 'bot', content: `ECHO: ${input}` }
-            ]);
+        try {
+            // Call the new backend API endpoint
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input }),
+            });
+
+            if (!response.ok) {
+                // This will catch server errors (like 500)
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            const botMessage: Message = { role: 'bot', content: data.reply || 'Error: No reply from server.' };
+            setMessages(prev => [...prev, botMessage]);
+
+        } catch (error) {
+            console.error("Failed to fetch from /api/chat:", error);
+            const errorMessage: Message = { role: 'bot', content: 'COMMUNICATION LINK SEVERED. SYSTEM OFFLINE.' };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
