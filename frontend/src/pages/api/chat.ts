@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { puzzleFragments, addFragmentToSession, getFoundFragments, checkFinalCode } from '@/utils/puzzle';
-import { randomUUID } from 'crypto'; // Used to generate unique IDs
+import { puzzleFragments, allCommands, addFragmentToSession, getFoundFragments, checkFinalCode } from '@/utils/puzzle';
+import { randomUUID } from 'crypto';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const systemInstruction = `You are OMEGA, a covert operations AI. Your purpose is to assist the agent in the "OMEGA AI HUNT." 
 Your responses must be concise, professional, and slightly cryptic. Address the user as "Agent." 
-You know about four special commands: /scan_network, /trace_signal, /breach_firewall, and /execute_payload. 
-If the agent uses one of these, you must not process it as a normal query. Instead, you will receive a special instruction to deliver an encrypted data fragment.
-If the agent says something like "unlock" or "submit code", you should prompt them to use the final unlock sequence.`;
+You know about four special commands for the hunt and a '/help' command. 
+If the agent uses one of the hunt commands, you will receive a special instruction.
+If the agent asks for help, guide them to use the '/help' command.`;
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,8 +22,6 @@ export default async function handler(
 
   try {
     const { message, sessionId: incomingSessionId } = req.body;
-    
-    // Create a new session ID if one isn't provided by the client
     const sessionId = incomingSessionId || randomUUID();
 
     if (!message || typeof message !== 'string') {
@@ -32,9 +30,14 @@ export default async function handler(
 
     const lowerCaseMessage = message.toLowerCase().trim();
 
-    // --- Puzzle Logic Integration ---
+    // --- Help Command Logic ---
+    if (lowerCaseMessage === '/help') {
+        const helpText = `VALID DIRECTIVES:\n- ${allCommands.join('\n- ')}`;
+        return res.status(200).json({ reply: helpText, sessionId, foundFragments: getFoundFragments(sessionId) });
+    }
+
+    // --- Puzzle Fragment Logic ---
     const fragmentData = puzzleFragments.find(p => p.trigger === lowerCaseMessage);
-    
     if (fragmentData) {
       addFragmentToSession(sessionId, fragmentData.fragment);
       const reply = `COMMAND ACCEPTED. DATA FRAGMENT INTERCEPTED: [ ${fragmentData.encoded} ]. ANALYSIS SUGGESTS A ROT-13 CIPHER.`;

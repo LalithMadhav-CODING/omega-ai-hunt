@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { getNextHint } from '@/utils/puzzle';
 
 type Message = {
     role: 'user' | 'bot';
@@ -14,10 +15,33 @@ const OmegaInterface = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [foundFragments, setFoundFragments] = useState<string[]>([]);
     const [missionComplete, setMissionComplete] = useState(false);
-    // State to hold the unique session ID for this user
     const [sessionId, setSessionId] = useState<string | null>(null);
+    
+    // State for the hint box
+    const [showHint, setShowHint] = useState(false);
+    const [hintText, setHintText] = useState('');
+
+    // Ref for the input element for auto-focus
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const showUnlockConsole = foundFragments.length === 4 && !missionComplete;
+
+    // Effect to trigger the hint box
+    useEffect(() => {
+        const messageCount = messages.length;
+        if (messageCount > 1 && messageCount % 6 === 0 && !missionComplete) {
+            setHintText(getNextHint(foundFragments));
+            setShowHint(true);
+        }
+        // Auto-focus the input after a new message is received
+        inputRef.current?.focus();
+    }, [messages, foundFragments, missionComplete]);
+
+    const handleHintClick = () => {
+        if (!hintText) return;
+        setMessages(prev => [...prev, { role: 'bot', content: hintText }]);
+        setShowHint(false);
+    };
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -26,12 +50,12 @@ const OmegaInterface = () => {
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
+        setShowHint(false);
 
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Send the current session ID with the request
                 body: JSON.stringify({ message: input, sessionId }),
             });
 
@@ -41,16 +65,9 @@ const OmegaInterface = () => {
             const botMessage: Message = { role: 'bot', content: data.reply || 'Error: No reply.' };
             setMessages(prev => [...prev, botMessage]);
 
-            // If the server gives us a session ID, save it for future requests
-            if (data.sessionId) {
-                setSessionId(data.sessionId);
-            }
-            if (data.foundFragments) {
-                setFoundFragments(data.foundFragments);
-            }
-            if (data.missionComplete) {
-                setMissionComplete(true);
-            }
+            if (data.sessionId) setSessionId(data.sessionId);
+            if (data.foundFragments) setFoundFragments(data.foundFragments);
+            if (data.missionComplete) setMissionComplete(true);
 
         } catch (error) {
             console.error("Failed to fetch from /api/chat:", error);
@@ -73,7 +90,8 @@ const OmegaInterface = () => {
                 {messages.map((msg, index) => (
                     <p key={index}>
                         <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {msg.content}
+                        {/* This handles newlines from the /help command */}
+                        {msg.content.split('\n').map((line, i) => <span key={i}>{line}<br/></span>)}
                     </p>
                 ))}
             </div>
@@ -92,6 +110,7 @@ const OmegaInterface = () => {
             ) : (
                 <div className="omega-input-area">
                     <input
+                        ref={inputRef} // Assign the ref here
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
@@ -102,6 +121,12 @@ const OmegaInterface = () => {
                     <button onClick={handleSend} disabled={isLoading}>
                         {isLoading ? 'TRANSMITTING...' : 'TRANSMIT'}
                     </button>
+                </div>
+            )}
+            
+            {showHint && (
+                <div className="hint-box" onClick={handleHintClick}>
+                    <div className="glitch-hint" data-text="HINT">HINT</div>
                 </div>
             )}
         </div>
