@@ -19,11 +19,11 @@ const LoginForm = () => {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // Placeholder authentication logic
         if (username === 'agent' && password === 'omega') {
             setError('');
-            console.log('Authentication successful. Redirecting...');
-            router.push('/chat');
+            // Trigger the transition event
+            const event = new CustomEvent('startTransition', { detail: '/chat' });
+            window.dispatchEvent(event);
         } else {
             setError('ACCESS DENIED: INVALID CREDENTIALS');
         }
