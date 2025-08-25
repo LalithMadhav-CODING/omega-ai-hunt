@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import TypingText from './TypingText'; // Import the new component
+import TypingText from './TypingText';
 
 type Message = {
     role: 'user' | 'bot';
@@ -8,7 +8,6 @@ type Message = {
 
 // Decoder Component (no changes)
 const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }) => {
-    // ... same code as before ...
     const [encodedInput, setEncodedInput] = useState('');
     const [isDecoding, setIsDecoding] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -67,6 +66,7 @@ const OmegaInterface = () => {
 
     const showUnlockConsole = foundFragments.length === 4 && !missionComplete;
 
+    // This function is now only for sending the message, not handling the form event.
     const sendMessage = async (messageText: string) => {
         if (!messageText.trim() || isLoading) return;
 
@@ -76,6 +76,7 @@ const OmegaInterface = () => {
         }
         
         setIsLoading(true);
+        if (isUserMessage) setInput('');
 
         try {
             const response = await fetch('/api/chat', {
@@ -92,19 +93,19 @@ const OmegaInterface = () => {
             if (data.missionComplete) setMissionComplete(true);
         } catch (error) {
             setMessages(prev => [...prev, { role: 'bot', content: 'COMMUNICATION LINK SEVERED.' }]);
-        } finally {
-            // We don't set isLoading to false here anymore.
-            // It will be set to false by the TypingText component's onComplete callback.
-            if (isUserMessage) setInput('');
         }
     };
     
+    // This new function handles the form submission and prevents duplicates.
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        sendMessage(input);
+    };
+
     useEffect(() => {
-        // Scroll to the bottom of the chat on new messages
         if (contentRef.current) {
             contentRef.current.scrollTop = contentRef.current.scrollHeight;
         }
-        // Focus input when not loading
         if (!isLoading) {
             inputRef.current?.focus();
         }
@@ -122,7 +123,6 @@ const OmegaInterface = () => {
                 {messages.map((msg, index) => (
                     <p key={index}>
                         <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {/* Use TypingText for the last bot message */}
                         {msg.role === 'bot' && index === messages.length - 1 ? (
                             <TypingText 
                                 text={msg.content} 
@@ -146,20 +146,20 @@ const OmegaInterface = () => {
             {missionComplete ? (
                  <div className="mission-complete-message">SECRET KEY: OMEGA AI HUNT</div>
             ) : (
-                <div className="omega-input-area">
+                // The input area is now a <form> with an onSubmit handler
+                <form className="omega-input-area" onSubmit={handleSubmit}>
                     <input
                         ref={inputRef}
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                         placeholder="Enter directive..."
                         disabled={isLoading}
                     />
-                    <button onClick={() => sendMessage(input)} disabled={isLoading}>
+                    <button type="submit" disabled={isLoading}>
                         {isLoading ? 'TRANSMITTING...' : 'TRANSMIT'}
                     </button>
-                </div>
+                </form>
             )}
         </div>
     );
