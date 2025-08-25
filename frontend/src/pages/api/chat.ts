@@ -25,14 +25,27 @@ export default async function handler(
 
     const lowerCaseMessage = message.toLowerCase().trim();
 
-    // --- Updated /help Command ---
+    // --- Easter Egg Logic ---
+    // This block checks for easter eggs before any other logic.
+    if (lowerCaseMessage === '/self_destruct') {
+        return res.status(200).json({ reply: "SELF-DESTRUCT SEQUENCE INITIATED. T-MINUS 10... 9... 8... SEQUENCE CANCELED. UNAUTHORIZED COMMAND, AGENT. DO NOT ATTEMPT AGAIN.", sessionId });
+    }
+    if (lowerCaseMessage.includes('shall we play a game')) {
+        return res.status(200).json({ reply: "GLOBAL THERMONUCLEAR WAR IS NOT A VIABLE STRATEGY, AGENT. PLEASE FOCUS ON THE MISSION.", sessionId });
+    }
+    if (lowerCaseMessage === 'who are you?') {
+        return res.status(200).json({ reply: "I AM THE OMEGA PROTOCOL. MY DIRECTIVES ARE CLASSIFIED.", sessionId });
+    }
+
+
+    // --- Help Command Logic ---
     if (lowerCaseMessage === '/help') {
         const commands = getShuffledCommands();
         const helpText = `AGENT, AVAILABLE DIRECTIVES ARE CLASSIFIED. AUTHORIZED COMMANDS DETECTED IN SYSTEM:\n\n${commands.join('\n')}`;
         return res.status(200).json({ reply: helpText, sessionId, foundFragments: Array.from(session.foundFragments) });
     }
 
-    // --- Multi-Step Puzzle Logic (no changes needed) ---
+    // --- Multi-Step Puzzle Logic ---
     for (const key in puzzleChains) {
         const chainKey = key as keyof typeof puzzleChains;
         const chain = puzzleChains[chainKey];
@@ -47,7 +60,7 @@ export default async function handler(
         }
     }
     
-    // --- Decoder & Unlock Logic (no changes needed) ---
+    // --- Decoder & Unlock Logic ---
     if (lowerCaseMessage.startsWith('/decode ')) {
         const decoded = decodeFragment(sessionId, message.substring(8).trim());
         return res.status(200).json({

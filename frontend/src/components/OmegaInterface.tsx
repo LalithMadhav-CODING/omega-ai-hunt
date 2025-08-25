@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import TypingText from './TypingText'; // Import the new component
 
-type Message = { role: 'user' | 'bot'; content: string; };
+type Message = {
+    role: 'user' | 'bot';
+    content: string;
+};
 
-// Decoder Component (no changes needed)
+// Decoder Component (no changes)
 const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }) => {
+    // ... same code as before ...
     const [encodedInput, setEncodedInput] = useState('');
     const [isDecoding, setIsDecoding] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -47,9 +52,7 @@ const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }
     );
 };
 
-
 const OmegaInterface = () => {
-    // --- New Initial Message with a Starting Clue ---
     const [messages, setMessages] = useState<Message[]>([
         { role: 'bot', content: 'STATUS: SECURE CONNECTION ESTABLISHED.' },
         { role: 'bot', content: 'OMEGA INTERFACE ONLINE. BEGIN BY SCANNING THE NETWORK OR USE /help FOR A LIST OF DIRECTIVES.' }
@@ -60,11 +63,12 @@ const OmegaInterface = () => {
     const [missionComplete, setMissionComplete] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const showUnlockConsole = foundFragments.length === 4 && !missionComplete;
 
     const sendMessage = async (messageText: string) => {
-        if (!messageText.trim()) return;
+        if (!messageText.trim() || isLoading) return;
 
         const isUserMessage = !messageText.startsWith('/decode');
         if (isUserMessage) {
@@ -89,12 +93,22 @@ const OmegaInterface = () => {
         } catch (error) {
             setMessages(prev => [...prev, { role: 'bot', content: 'COMMUNICATION LINK SEVERED.' }]);
         } finally {
-            setIsLoading(false);
+            // We don't set isLoading to false here anymore.
+            // It will be set to false by the TypingText component's onComplete callback.
             if (isUserMessage) setInput('');
         }
     };
     
-    useEffect(() => { inputRef.current?.focus(); }, [isLoading]);
+    useEffect(() => {
+        // Scroll to the bottom of the chat on new messages
+        if (contentRef.current) {
+            contentRef.current.scrollTop = contentRef.current.scrollHeight;
+        }
+        // Focus input when not loading
+        if (!isLoading) {
+            inputRef.current?.focus();
+        }
+    }, [messages, isLoading]);
 
     return (
         <div className="omega-interface">
@@ -104,11 +118,19 @@ const OmegaInterface = () => {
                     DECODED FRAGMENTS: [ {foundFragments.join(' | ')} ]
                 </div>
             </div>
-            <div className="omega-content">
+            <div className="omega-content" ref={contentRef}>
                 {messages.map((msg, index) => (
                     <p key={index}>
                         <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {msg.content.split('\n').map((line, i) => <span key={i}>{line}<br/></span>)}
+                        {/* Use TypingText for the last bot message */}
+                        {msg.role === 'bot' && index === messages.length - 1 ? (
+                            <TypingText 
+                                text={msg.content} 
+                                onComplete={() => setIsLoading(false)} 
+                            />
+                        ) : (
+                            msg.content.split('\n').map((line, i) => <span key={i}>{line}<br/></span>)
+                        )}
                     </p>
                 ))}
             </div>
