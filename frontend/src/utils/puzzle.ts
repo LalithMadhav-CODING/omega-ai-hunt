@@ -1,4 +1,3 @@
-// --- 1. The Encoders & Final Key ---
 const rot13 = (str: string): string => {
   return str.replace(/[a-zA-Z]/g, (c) => {
     const code = c.charCodeAt(0);
@@ -10,15 +9,14 @@ const rot13 = (str: string): string => {
 const DECODED_PHRASE = "DECRYPT PROTOCOL OMEGA NOW";
 export const SECRET_KEY = rot13(DECODED_PHRASE);
 
-// --- 2. The New Puzzle Definition ---
-// Each puzzle is now a chain of steps. The final step rewards an ENCODED fragment.
+// --- New Puzzle Definition with Vague Hints ---
 export const puzzleChains = {
   DECRYPT: {
     fragment: "DECRYPT",
     encoded: rot13("DECRYPT"),
     steps: [
-      { command: "/scan_network", response: "Network scan initiated... Encrypted node detected at frequency 77.5 MHz. Recommend: /isolate_frequency [frequency]" },
-      { command: "/isolate_frequency 77.5", response: "Frequency isolated. Repeating data packet found. Recommend: /capture_packet" },
+      { command: "/scan_network", response: "Network scan initiated... Encrypted node detected broadcasting on frequency 77.5 MHz. Signal isolation is possible." },
+      { command: "/isolate_frequency 77.5", response: "Frequency isolated. A repeating data packet has been found within the signal." },
       { command: "/capture_packet", response: `Packet captured. Payload is encrypted. DATA FRAGMENT ACQUIRED: [ ${rot13("DECRYPT")} ]. Use the DECODE terminal.` }
     ]
   },
@@ -26,17 +24,17 @@ export const puzzleChains = {
     fragment: "PROTOCOL",
     encoded: rot13("PROTOCOL"),
     steps: [
-      { command: "/trace_signal", response: "Signal trace active... Vulnerable entry point detected at IP 192.168.1.101. Recommend: /exploit_port [ip_address]" },
-      { command: "/exploit_port 192.168.1.101", response: "Exploit successful. System logs acquired. Recommend: /parse_logs" },
-      { command: "/parse_logs", response: `Logs parsed. Hidden directive found. DATA FRAGMENT ACQUIRED: [ ${rot13("PROTOCOL")} ]. Use the DECODE terminal.` }
+      { command: "/trace_signal", response: "Signal trace active... A vulnerable entry point has been located at IP 192.168.1.101." },
+      { command: "/exploit_port 192.168.1.101", response: "Exploit successful. Root access granted. System logs are now accessible." },
+      { command: "/parse_logs", response: `Logs parsed. A hidden directive was found. DATA FRAGMENT ACQUIRED: [ ${rot13("PROTOCOL")} ]. Use the DECODE terminal.` }
     ]
   },
   OMEGA: {
     fragment: "OMEGA",
     encoded: rot13("OMEGA"),
     steps: [
-      { command: "/breach_firewall", response: "Firewall breach initiated... Security requires a decryption key. Intel suggests it's a project name. Recommend: /query_directives" },
-      { command: "/query_directives", response: "Directives queried. Found reference to 'Project Chimera'. Recommend: /use_key [key]" },
+      { command: "/breach_firewall", response: "Firewall breach initiated... Security protocols require a decryption key. Intel suggests the key is a classified project name." },
+      { command: "/query_directives", response: "Directives queried. Found reference to 'Project Chimera'. This may be the key." },
       { command: "/use_key chimera", response: `Key accepted. Firewall bypassed. DATA FRAGMENT ACQUIRED: [ ${rot13("OMEGA")} ]. Use the DECODE terminal.` }
     ]
   },
@@ -44,22 +42,39 @@ export const puzzleChains = {
     fragment: "NOW",
     encoded: rot13("NOW"),
     steps: [
-      { command: "/execute_payload", response: "Payload execution requires authentication. A biometric signature is needed. Recommend: /scan_biometrics" },
-      { command: "/scan_biometrics", response: "Biometric scan active... Signature does not match authorized personnel. An override is possible. Recommend: /force_override" },
+      { command: "/execute_payload", response: "Payload execution requires authentication. Biometric signature scan is necessary." },
+      { command: "/scan_biometrics", response: "Biometric scan active... Signature does not match authorized personnel. A forced override may be possible." },
       { command: "/force_override", response: `Override successful. Payload executed. DATA FRAGMENT ACQUIRED: [ ${rot13("NOW")} ]. Use the DECODE terminal.` }
     ]
   }
 };
 
-// --- 3. Session Management ---
-// This now tracks the user's current step in each puzzle chain.
+// --- Helper function to shuffle an array ---
+const shuffleArray = <T>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
+
+// --- New Shuffled Command List for /help ---
+export const getShuffledCommands = (): string[] => {
+    const missionCommands = Object.values(puzzleChains).flatMap(chain => chain.steps.map(step => step.command));
+    const systemCommands = ['/unlock [sequence]', '/decode [fragment]', '/help'];
+    // FIX: Use Array.from() for compatibility with older TS targets
+    return shuffleArray(Array.from(new Set([...missionCommands, ...systemCommands])));
+};
+
+
+// --- Session Management (no changes needed here) ---
 interface UserSession {
-  foundFragments: Set<string>; // Stores DECODED fragments
-  puzzleProgress: { [key: string]: number }; // e.g., { DECRYPT: 1, PROTOCOL: 0, ... }
+  foundFragments: Set<string>;
+  puzzleProgress: { [key: string]: number };
 }
 const userSessions = new Map<string, UserSession>();
 
-// Helper to initialize a session
 const ensureSession = (sessionId: string) => {
   if (!userSessions.has(sessionId)) {
     userSessions.set(sessionId, {
@@ -71,22 +86,17 @@ const ensureSession = (sessionId: string) => {
 };
 
 export const getSession = (sessionId: string) => ensureSession(sessionId);
-
 export const advancePuzzleStep = (sessionId: string, fragmentKey: string) => {
   const session = ensureSession(sessionId);
   session.puzzleProgress[fragmentKey]++;
 };
-
 export const addDecodedFragment = (sessionId: string, fragment: string) => {
     const session = ensureSession(sessionId);
     session.foundFragments.add(fragment);
 };
-
 export const checkFinalCode = (submission: string): boolean => {
     return submission.toUpperCase() === DECODED_PHRASE;
 };
-
-// New function to decode a fragment and add it to the session
 export const decodeFragment = (sessionId: string, encodedFragment: string): string | null => {
     for (const key in puzzleChains) {
         const chain = puzzleChains[key as keyof typeof puzzleChains];
