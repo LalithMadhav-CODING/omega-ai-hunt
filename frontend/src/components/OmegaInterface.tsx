@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TypingText from './TypingText';
 
 type Message = {
@@ -66,8 +66,9 @@ const OmegaInterface = () => {
 
     const showUnlockConsole = foundFragments.length === 4 && !missionComplete;
 
-    // This function is now only for sending the message, not handling the form event.
-    const sendMessage = async (messageText: string) => {
+    // By wrapping this in useCallback, we prevent it from being recreated on every render,
+    // which helps to stop the re-render loop.
+    const sendMessage = useCallback(async (messageText: string) => {
         if (!messageText.trim() || isLoading) return;
 
         const isUserMessage = !messageText.startsWith('/decode');
@@ -94,22 +95,27 @@ const OmegaInterface = () => {
         } catch (error) {
             setMessages(prev => [...prev, { role: 'bot', content: 'COMMUNICATION LINK SEVERED.' }]);
         }
-    };
+        // NOTE: We no longer set isLoading to false here. The TypingText component does it.
+    }, [isLoading, sessionId]); // Dependencies for the callback
     
-    // This new function handles the form submission and prevents duplicates.
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         sendMessage(input);
     };
 
+    // This effect now only runs when the messages array changes, for scrolling.
     useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTop = contentRef.current.scrollHeight;
         }
+    }, [messages]);
+
+    // This effect now only runs when the loading state changes, for focus.
+    useEffect(() => {
         if (!isLoading) {
             inputRef.current?.focus();
         }
-    }, [messages, isLoading]);
+    }, [isLoading]);
 
     return (
         <div className="omega-interface">
@@ -123,13 +129,13 @@ const OmegaInterface = () => {
                 {messages.map((msg, index) => (
                     <p key={index}>
                         <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {msg.role === 'bot' && index === messages.length - 1 ? (
+                        {msg.role === 'bot' && index === messages.length - 1 && isLoading ? (
                             <TypingText 
                                 text={msg.content} 
                                 onComplete={() => setIsLoading(false)} 
                             />
                         ) : (
-                            msg.content.split('\n').map((line, i) => <span key={i}>{line}<br/></span>)
+                            msg.content.split('\n').map((line, i) => <span key={index + '-' + i}>{line}<br/></span>)
                         )}
                     </p>
                 ))}
@@ -146,7 +152,6 @@ const OmegaInterface = () => {
             {missionComplete ? (
                  <div className="mission-complete-message">SECRET KEY: OMEGA AI HUNT</div>
             ) : (
-                // The input area is now a <form> with an onSubmit handler
                 <form className="omega-input-area" onSubmit={handleSubmit}>
                     <input
                         ref={inputRef}
