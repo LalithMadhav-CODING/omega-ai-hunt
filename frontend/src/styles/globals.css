@@ -247,3 +247,43 @@ body {
   100% { clip: rect(40px, 9999px, 62px, 0); }
 }
 
+/* --- Puzzle UI Styles --- */
+.fragment-display {
+    color: #00e5e5;
+    border-top: 1px solid rgba(0, 229, 229, 0.3);
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    min-height: 1.2em;
+}
+
+.unlock-console {
+    border: 1px solid #ff9900;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #ff9900;
+    text-align: center;
+}
+
+.mission-complete-message {
+    border: 1px solid #00e5e5;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #00e5e5;
+    text-align: center;
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 229, 229, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 10px 20px rgba(0, 229, 229, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 229, 229, 0);
+    }
+}
