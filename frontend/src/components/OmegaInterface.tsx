@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import TypingText from './TypingText';
+import TypingText from '@/components/TypingText'; // Corrected import path
 
 type Message = {
     role: 'user' | 'bot';
@@ -72,12 +72,14 @@ const OmegaInterface = () => {
         if (!messageText.trim() || isLoading) return;
 
         const isUserMessage = !messageText.startsWith('/decode');
+        
+        // Use functional updates for state to ensure we always have the latest state
         if (isUserMessage) {
             setMessages(prev => [...prev, { role: 'user', content: messageText }]);
+            setInput('');
         }
         
         setIsLoading(true);
-        if (isUserMessage) setInput('');
 
         try {
             const response = await fetch('/api/chat', {
@@ -129,7 +131,8 @@ const OmegaInterface = () => {
                 {messages.map((msg, index) => (
                     <p key={index}>
                         <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {msg.role === 'bot' && index === messages.length - 1 && isLoading ? (
+                        {/* The condition to show TypingText is now more robust */}
+                        {(msg.role === 'bot' && index === messages.length - 1 && isLoading) ? (
                             <TypingText 
                                 text={msg.content} 
                                 onComplete={() => setIsLoading(false)} 
