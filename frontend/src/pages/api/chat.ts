@@ -5,7 +5,9 @@ import { randomUUID } from 'crypto';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-const systemInstruction = `You are OMEGA, a covert operations AI. Your purpose is to assist the agent in the "OMEGA AI HUNT." Your responses must be concise, professional, and slightly cryptic. Address the user as "Agent." You are aware of a multi-step puzzle involving special commands. If the agent uses a command you don't recognize as part of the puzzle, respond as a helpful but secretive AI.`;
+const systemInstruction = `You are OMEGA, a covert operations AI. Your purpose is to assist the agent in the "OMEGA AI HUNT." 
+Your responses must be concise, professional, and slightly cryptic. Address the user as "Agent." 
+You are aware of a multi-step puzzle involving special commands. If the agent uses a command you don't recognize as part of the puzzle, respond as a helpful but secretive AI.`;
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,13 +28,19 @@ export default async function handler(
 
     const lowerCaseMessage = message.toLowerCase().trim();
 
-    // --- New Multi-Step Puzzle Logic ---
+    // --- New, More Helpful /help Command ---
+    if (lowerCaseMessage === '/help') {
+        const initialCommands = Object.values(puzzleChains).map(chain => chain.steps[0].command);
+        const helpText = `AGENT, YOUR AVAILABLE DIRECTIVES ARE:\n\n// MISSION COMMANDS //\n${initialCommands.join('\n')}\n\n// SYSTEM COMMANDS //\n/unlock [sequence]\n/decode [fragment]\n/help`;
+        return res.status(200).json({ reply: helpText, sessionId, foundFragments: Array.from(session.foundFragments) });
+    }
+
+    // --- Multi-Step Puzzle Logic ---
     for (const key in puzzleChains) {
         const chainKey = key as keyof typeof puzzleChains;
         const chain = puzzleChains[chainKey];
         const currentStep = session.puzzleProgress[chainKey];
 
-        // Check if the user's command matches the *next expected step* in any chain
         if (currentStep < chain.steps.length && lowerCaseMessage === chain.steps[currentStep].command) {
             advancePuzzleStep(sessionId, chainKey);
             const responseText = chain.steps[currentStep].response;
@@ -44,7 +52,7 @@ export default async function handler(
         }
     }
     
-    // --- New Decoder Logic ---
+    // --- Decoder Logic ---
     if (lowerCaseMessage.startsWith('/decode ')) {
         const encodedFragment = message.substring(8).trim();
         const decoded = decodeFragment(sessionId, encodedFragment);
@@ -62,7 +70,6 @@ export default async function handler(
             });
         }
     }
-
 
     // --- Final Unlock Logic ---
     if (lowerCaseMessage.startsWith('/unlock ')) {

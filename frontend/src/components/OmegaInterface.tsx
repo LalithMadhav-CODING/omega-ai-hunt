@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 type Message = { role: 'user' | 'bot'; content: string; };
 
-// New Decoder Component
+// Decoder Component (no changes needed)
 const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }) => {
     const [encodedInput, setEncodedInput] = useState('');
     const [isDecoding, setIsDecoding] = useState(false);
@@ -12,12 +12,9 @@ const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }
         if (!encodedInput.trim()) return;
         setIsDecoding(true);
         setProgress(0);
-
-        // Hacker loading bar animation
         setTimeout(() => setProgress(10), 200);
         setTimeout(() => setProgress(50), 800);
         setTimeout(() => setProgress(100), 1500);
-
         setTimeout(async () => {
             await onDecode(`/decode ${encodedInput}`);
             setIsDecoding(false);
@@ -52,9 +49,10 @@ const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }
 
 
 const OmegaInterface = () => {
+    // --- New Initial Message with a Starting Clue ---
     const [messages, setMessages] = useState<Message[]>([
         { role: 'bot', content: 'STATUS: SECURE CONNECTION ESTABLISHED.' },
-        { role: 'bot', content: 'OMEGA INTERFACE ONLINE. AWAITING DIRECTIVE...' }
+        { role: 'bot', content: 'OMEGA INTERFACE ONLINE. BEGIN BY SCANNING THE NETWORK OR USE /help FOR A LIST OF DIRECTIVES.' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -145,4 +143,4 @@ const OmegaInterface = () => {
     );
 };
 
-export default OmegaInterface; 
+export default OmegaInterface;
