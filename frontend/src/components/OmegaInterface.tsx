@@ -1,10 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getNextHint } from '@/utils/puzzle';
 
-type Message = {
-    role: 'user' | 'bot';
-    content: string;
+type Message = { role: 'user' | 'bot'; content: string; };
+
+// New Decoder Component
+const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }) => {
+    const [encodedInput, setEncodedInput] = useState('');
+    const [isDecoding, setIsDecoding] = useState(false);
+    const [progress, setProgress] = useState(0);
+
+    const handleDecode = async () => {
+        if (!encodedInput.trim()) return;
+        setIsDecoding(true);
+        setProgress(0);
+
+        // Hacker loading bar animation
+        setTimeout(() => setProgress(10), 200);
+        setTimeout(() => setProgress(50), 800);
+        setTimeout(() => setProgress(100), 1500);
+
+        setTimeout(async () => {
+            await onDecode(`/decode ${encodedInput}`);
+            setIsDecoding(false);
+            setEncodedInput('');
+        }, 2000);
+    };
+
+    return (
+        <div className="decoder-box">
+            <label htmlFor="decoder-input">DECODE TERMINAL:</label>
+            <div className="decoder-input-group">
+                <input
+                    id="decoder-input"
+                    type="text"
+                    value={encodedInput}
+                    onChange={(e) => setEncodedInput(e.target.value)}
+                    placeholder="Enter encrypted fragment..."
+                    disabled={isDecoding}
+                />
+                <button onClick={handleDecode} disabled={isDecoding}>
+                    {isDecoding ? 'DECODING...' : 'DECODE'}
+                </button>
+            </div>
+            {isDecoding && (
+                <div className="loading-bar-container">
+                    <div className="loading-bar" style={{ width: `${progress}%` }}></div>
+                </div>
+            )}
+        </div>
+    );
 };
+
 
 const OmegaInterface = () => {
     const [messages, setMessages] = useState<Message[]>([
@@ -16,121 +61,88 @@ const OmegaInterface = () => {
     const [foundFragments, setFoundFragments] = useState<string[]>([]);
     const [missionComplete, setMissionComplete] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
-    
-    // State for the hint box
-    const [showHint, setShowHint] = useState(false);
-    const [hintText, setHintText] = useState('');
-
-    // Ref for the input element for auto-focus
     const inputRef = useRef<HTMLInputElement>(null);
 
     const showUnlockConsole = foundFragments.length === 4 && !missionComplete;
 
-    // Effect to trigger the hint box
-    useEffect(() => {
-        const messageCount = messages.length;
-        if (messageCount > 1 && messageCount % 6 === 0 && !missionComplete) {
-            setHintText(getNextHint(foundFragments));
-            setShowHint(true);
+    const sendMessage = async (messageText: string) => {
+        if (!messageText.trim()) return;
+
+        const isUserMessage = !messageText.startsWith('/decode');
+        if (isUserMessage) {
+            setMessages(prev => [...prev, { role: 'user', content: messageText }]);
         }
-        // Auto-focus the input after a new message is received
-        inputRef.current?.focus();
-    }, [messages, foundFragments, missionComplete]);
-
-    const handleHintClick = () => {
-        if (!hintText) return;
-        setMessages(prev => [...prev, { role: 'bot', content: hintText }]);
-        setShowHint(false);
-    };
-
-    const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
-
-        const userMessage: Message = { role: 'user', content: input };
-        setMessages(prev => [...prev, userMessage]);
-        setInput('');
+        
         setIsLoading(true);
-        setShowHint(false);
 
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input, sessionId }),
+                body: JSON.stringify({ message: messageText, sessionId }),
             });
-
-            if (!response.ok) throw new Error('Network response was not ok');
-
+            if (!response.ok) throw new Error('Network response failed');
             const data = await response.json();
-            const botMessage: Message = { role: 'bot', content: data.reply || 'Error: No reply.' };
-            setMessages(prev => [...prev, botMessage]);
 
+            setMessages(prev => [...prev, { role: 'bot', content: data.reply || 'Error' }]);
             if (data.sessionId) setSessionId(data.sessionId);
             if (data.foundFragments) setFoundFragments(data.foundFragments);
             if (data.missionComplete) setMissionComplete(true);
-
         } catch (error) {
-            console.error("Failed to fetch from /api/chat:", error);
-            const errorMessage: Message = { role: 'bot', content: 'COMMUNICATION LINK SEVERED.' };
-            setMessages(prev => [...prev, errorMessage]);
+            setMessages(prev => [...prev, { role: 'bot', content: 'COMMUNICATION LINK SEVERED.' }]);
         } finally {
             setIsLoading(false);
+            if (isUserMessage) setInput('');
         }
     };
+    
+    useEffect(() => { inputRef.current?.focus(); }, [isLoading]);
 
     return (
         <div className="omega-interface">
             <div className="omega-header">
                 <h1>// OMEGA AI HUNT //</h1>
                 <div className="fragment-display">
-                    DATA FRAGMENTS: [ {foundFragments.join(' | ')} ]
+                    DECODED FRAGMENTS: [ {foundFragments.join(' | ')} ]
                 </div>
             </div>
             <div className="omega-content">
                 {messages.map((msg, index) => (
                     <p key={index}>
                         <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {/* This handles newlines from the /help command */}
                         {msg.content.split('\n').map((line, i) => <span key={i}>{line}<br/></span>)}
                     </p>
                 ))}
             </div>
+            
+            <Decoder onDecode={sendMessage} />
 
             {showUnlockConsole && (
                 <div className="unlock-console">
-                    <p>SYSTEM ALERT: ALL FRAGMENTS COLLECTED. FINAL DECRYPTION PROTOCOL AVAILABLE.</p>
-                    <p>ENTER FINAL SEQUENCE USING: /unlock [DECODED PHRASE]</p>
+                    <p>ALL FRAGMENTS DECODED. USE: /unlock [DECODED PHRASE]</p>
                 </div>
             )}
 
             {missionComplete ? (
-                 <div className="mission-complete-message">
-                    SECRET KEY: OMEGA AI HUNT
-                </div>
+                 <div className="mission-complete-message">SECRET KEY: OMEGA AI HUNT</div>
             ) : (
                 <div className="omega-input-area">
                     <input
-                        ref={inputRef} // Assign the ref here
+                        ref={inputRef}
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                        onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                         placeholder="Enter directive..."
                         disabled={isLoading}
                     />
-                    <button onClick={handleSend} disabled={isLoading}>
+                    <button onClick={() => sendMessage(input)} disabled={isLoading}>
                         {isLoading ? 'TRANSMITTING...' : 'TRANSMIT'}
                     </button>
-                </div>
-            )}
-            
-            {showHint && (
-                <div className="hint-box" onClick={handleHintClick}>
-                    <div className="glitch-hint" data-text="HINT">HINT</div>
                 </div>
             )}
         </div>
     );
 };
 
-export default OmegaInterface;
+export default OmegaInterface; 
