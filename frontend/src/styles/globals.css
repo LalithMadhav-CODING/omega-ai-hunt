@@ -664,7 +664,7 @@ body {
 
 .fragment-display {
   background-color: #0d0d0d; /* same as terminal bg */
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.6rem;
   display: inline-block;
   position: relative;
   z-index: 2; /* ensures it stays above scrolling text */
