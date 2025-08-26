@@ -1,16 +1,16 @@
-# omega-ai-hunt
-OMEGA AI HUNT: An interactive AI assistant featuring a covert-ops theme and an intelligent puzzle mechanism. Users must uncover four encrypted data fragments through specific interactions to reveal the final secret key. Built with Next.js, TypeScript, and Google's Gemini API.
-# OMEGA AI HUNT
+# omega-ai
+OMEGA AI : An interactive AI assistant featuring a covert-ops theme and an intelligent puzzle mechanism. Users must uncover four encrypted data fragments through specific interactions to reveal the final secret key. Built with Next.js, TypeScript, and Google's Gemini API.
+# OMEGA AI 
 
 ### An Interactive AI Assistant with a Covert-Ops Themed Puzzle
 
-OMEGA AI HUNT is an interactive AI assistant featuring a covert-ops theme and an intelligent puzzle mechanism. Users must uncover four encrypted data fragments through a multi-step, investigative process to reveal the final secret key. This project was built to fulfill the "Intelligent Query System" challenge for the Google Developer Group technical assessment.
+OMEGA AI is an interactive AI assistant featuring a covert-ops theme and an intelligent puzzle mechanism. Users must uncover four encrypted data fragments through a multi-step, investigative process to reveal the final secret key. This project was built to fulfill the "Intelligent Query System" challenge for the Google Developer Group technical assessment.
 
 ---
 
 ### 🚀 Live Deployment
 
-**[<< ACCESS THE OMEGA INTERFACE HERE >>](https://omega-ai-hunt-9hed6oh5k-lalithmadhav-codings-projects.vercel.app/)**
+**[<< ACCESS THE OMEGA INTERFACE HERE >>](https://omega-ai-bot.vercel.app//)**
 
 ---
 
@@ -87,6 +87,10 @@ To run this project locally, follow these steps:
     ```
     The application will be available at `http://localhost:3000`.
 
+6.  **Login Credentials:**
+
+    * Agent ID: `Agent-007`
+    * Passcode: `omega`
 ---
 
 ### 🔑 Secret Key Implementation
