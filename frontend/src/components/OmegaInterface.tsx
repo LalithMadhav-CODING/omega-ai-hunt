@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import TypingText from '@/components/TypingText'; // Corrected import path
+import TypingText from './TypingText';
+import ScanningAnimation from './ScanningAnimation'; // Import the new component
 
-type Message = {
-    role: 'user' | 'bot';
-    content: string;
-};
+type Message = { role: 'user' | 'bot'; content: string; };
 
-// Decoder Component (no changes)
+// Decoder Component (no changes needed)
 const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }) => {
     const [encodedInput, setEncodedInput] = useState('');
     const [isDecoding, setIsDecoding] = useState(false);
@@ -28,7 +26,7 @@ const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }
 
     return (
         <div className="decoder-box">
-            <label htmlFor="decoder-input">DECODE TERMINAL:</label>
+            <label htmlFor="decoder-input">DECODE TERMINAL</label>
             <div className="decoder-input-group">
                 <input
                     id="decoder-input"
@@ -51,6 +49,7 @@ const Decoder = ({ onDecode }: { onDecode: (fragment: string) => Promise<void> }
     );
 };
 
+
 const OmegaInterface = () => {
     const [messages, setMessages] = useState<Message[]>([
         { role: 'bot', content: 'STATUS: SECURE CONNECTION ESTABLISHED.' },
@@ -61,27 +60,33 @@ const OmegaInterface = () => {
     const [foundFragments, setFoundFragments] = useState<string[]>([]);
     const [missionComplete, setMissionComplete] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
+    const [scanType, setScanType] = useState<string | null>(null); // State for animation
     const inputRef = useRef<HTMLInputElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
     const showUnlockConsole = foundFragments.length === 4 && !missionComplete;
 
-    // By wrapping this in useCallback, we prevent it from being recreated on every render,
-    // which helps to stop the re-render loop.
     const sendMessage = useCallback(async (messageText: string) => {
         if (!messageText.trim() || isLoading) return;
 
         const isUserMessage = !messageText.startsWith('/decode');
-        
-        // Use functional updates for state to ensure we always have the latest state
         if (isUserMessage) {
             setMessages(prev => [...prev, { role: 'user', content: messageText }]);
-            setInput('');
         }
         
+        // Trigger scanning animation based on command
+        if (messageText.startsWith('/scan_network')) setScanType('network');
+        else if (messageText.startsWith('/scan_biometrics')) setScanType('biometric');
+        
         setIsLoading(true);
+        if (isUserMessage) setInput('');
 
         try {
+            // Add a small delay for the animation to be visible
+            if (scanType) {
+                await new Promise(resolve => setTimeout(resolve, 2500));
+            }
+
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -96,23 +101,22 @@ const OmegaInterface = () => {
             if (data.missionComplete) setMissionComplete(true);
         } catch (error) {
             setMessages(prev => [...prev, { role: 'bot', content: 'COMMUNICATION LINK SEVERED.' }]);
+        } finally {
+            setScanType(null); // Hide animation after response
         }
-        // NOTE: We no longer set isLoading to false here. The TypingText component does it.
-    }, [isLoading, sessionId]); // Dependencies for the callback
+    }, [isLoading, sessionId, scanType]);
     
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         sendMessage(input);
     };
-
-    // This effect now only runs when the messages array changes, for scrolling.
+    
     useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTop = contentRef.current.scrollHeight;
         }
     }, [messages]);
 
-    // This effect now only runs when the loading state changes, for focus.
     useEffect(() => {
         if (!isLoading) {
             inputRef.current?.focus();
@@ -120,56 +124,58 @@ const OmegaInterface = () => {
     }, [isLoading]);
 
     return (
-        <div className="omega-interface">
-            <div className="omega-header">
-                <h1>// OMEGA AI HUNT //</h1>
+        <>
+            <ScanningAnimation scanType={scanType} />
+            <div className="omega-interface">
+                <div className="omega-header">
+                    <h1>// OMEGA AI HUNT //</h1>
+                </div>
                 <div className="fragment-display">
                     DECODED FRAGMENTS: [ {foundFragments.join(' | ')} ]
                 </div>
-            </div>
-            <div className="omega-content" ref={contentRef}>
-                {messages.map((msg, index) => (
-                    <p key={index}>
-                        <strong>{msg.role === 'user' ? '> ' : ''}</strong>
-                        {/* The condition to show TypingText is now more robust */}
-                        {(msg.role === 'bot' && index === messages.length - 1 && isLoading) ? (
-                            <TypingText 
-                                text={msg.content} 
-                                onComplete={() => setIsLoading(false)} 
-                            />
-                        ) : (
-                            msg.content.split('\n').map((line, i) => <span key={index + '-' + i}>{line}<br/></span>)
-                        )}
-                    </p>
-                ))}
-            </div>
-            
-            <Decoder onDecode={sendMessage} />
-
-            {showUnlockConsole && (
-                <div className="unlock-console">
-                    <p>ALL FRAGMENTS DECODED. USE: /unlock [DECODED PHRASE]</p>
+                <div className="omega-content" ref={contentRef}>
+                    {messages.map((msg, index) => (
+                        <p key={index}>
+                            <strong>{msg.role === 'user' ? '> ' : ''}</strong>
+                            {(msg.role === 'bot' && index === messages.length - 1 && isLoading && !scanType) ? (
+                                <TypingText 
+                                    text={msg.content} 
+                                    onComplete={() => setIsLoading(false)} 
+                                />
+                            ) : (
+                                msg.content.split('\n').map((line, i) => <span key={index + '-' + i}>{line}<br/></span>)
+                            )}
+                        </p>
+                    ))}
                 </div>
-            )}
+                
+                <Decoder onDecode={sendMessage} />
 
-            {missionComplete ? (
-                 <div className="mission-complete-message">SECRET KEY: OMEGA AI HUNT</div>
-            ) : (
-                <form className="omega-input-area" onSubmit={handleSubmit}>
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Enter directive..."
-                        disabled={isLoading}
-                    />
-                    <button type="submit" disabled={isLoading}>
-                        {isLoading ? 'TRANSMITTING...' : 'TRANSMIT'}
-                    </button>
-                </form>
-            )}
-        </div>
+                {showUnlockConsole && (
+                    <div className="unlock-console">
+                        <p>ALL FRAGMENTS DECODED. USE: /unlock [DECODED PHRASE]</p>
+                    </div>
+                )}
+
+                {missionComplete ? (
+                     <div className="mission-complete-message">SECRET KEY: OMEGA AI HUNT</div>
+                ) : (
+                    <form className="omega-input-area" onSubmit={handleSubmit}>
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Enter directive..."
+                            disabled={isLoading}
+                        />
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? 'PROCESSING...' : 'TRANSMIT'}
+                        </button>
+                    </form>
+                )}
+            </div>
+        </>
     );
 };
 

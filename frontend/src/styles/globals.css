@@ -474,3 +474,61 @@ body {
     opacity: 0;
   }
 }
+
+/* --- Scanning Animation Styles --- */
+.scanning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(26, 26, 26, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    color: #ff9900;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.scanning-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.scanning-icon {
+    width: 150px;
+    height: 150px;
+    animation: pulse-scan 2s infinite;
+}
+
+.scanning-icon .ring {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: draw-ring 2s infinite linear;
+}
+
+.scanning-text {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+    animation: flicker 1.5s infinite;
+}
+
+@keyframes pulse-scan {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+@keyframes draw-ring {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
