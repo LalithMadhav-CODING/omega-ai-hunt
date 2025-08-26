@@ -555,3 +555,95 @@ body {
 .login-button, .glitch-text, .scanning-text {
     font-family: 'Aquire', sans-serif;
 }
+
+/* --- Cyberpunk Title (Omega AI) --- */
+.omega-header {
+  text-align: center;
+  color: #00ff41; /* Neon green */
+  border-bottom: 2px solid rgba(0, 255, 65, 0.5);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  letter-spacing: 6px;
+  font-family: 'Aquire', sans-serif;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+
+  /* Neon glow */
+  text-shadow: 
+    0 0 5px #00ff41,
+    0 0 10px #00ff41,
+    0 0 20px #00ff41,
+    0 0 40px #00ff41;
+
+  /* Random burst flicker */
+  animation: cyber-flicker 6s infinite;
+}
+
+@keyframes cyber-flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+    text-shadow: 
+      0 0 5px #00ff41,
+      0 0 10px #00ff41,
+      0 0 20px #00ff41,
+      0 0 40px #00ff41;
+    transform: translate(0,0);
+  }
+  19%, 24%, 55% {
+    opacity: 0.6;
+    filter: brightness(0.6);
+    text-shadow: none;
+  }
+  /* glitch burst shake + brightness change */
+  20%, 54% {
+    transform: translate(-1px, 1px);
+    filter: brightness(1.4);
+  }
+  21%, 56% {
+    transform: translate(2px, -2px);
+    filter: brightness(0.8);
+  }
+}
+
+/* --- Glitch Burst Ghost Text --- */
+.omega-header::before,
+.omega-header::after {
+  content: "OMEGA AI";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  clip: rect(0, 900px, 0, 0);
+  opacity: 0; /* invisible unless glitching */
+}
+
+.omega-header::before {
+  text-shadow: -2px 0 #ff004d;
+  animation: glitch-anim-1 6s infinite;
+}
+
+.omega-header::after {
+  text-shadow: 2px 0 #00eaff;
+  animation: glitch-anim-2 6s infinite;
+}
+
+@keyframes glitch-anim-1 {
+  0%, 90%, 100% { opacity: 0; }
+  10%, 11%, 12% { clip: rect(20px, 9999px, 40px, 0); opacity: 1; }
+  30% { clip: rect(60px, 9999px, 80px, 0); opacity: 1; }
+  31% { opacity: 0; }
+  70% { clip: rect(10px, 9999px, 50px, 0); opacity: 1; }
+  71% { opacity: 0; }
+}
+
+@keyframes glitch-anim-2 {
+  0%, 90%, 100% { opacity: 0; }
+  15%, 16% { clip: rect(45px, 9999px, 65px, 0); opacity: 1; }
+  35% { clip: rect(5px, 9999px, 25px, 0); opacity: 1; }
+  36% { opacity: 0; }
+  75% { clip: rect(35px, 9999px, 85px, 0); opacity: 1; }
+  76% { opacity: 0; }
+}

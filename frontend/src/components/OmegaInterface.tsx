@@ -128,7 +128,7 @@ const OmegaInterface = () => {
             <ScanningAnimation scanType={scanType} />
             <div className="omega-interface">
                 <div className="omega-header">
-                    <h1>// OMEGA AI HUNT //</h1>
+                    <h1>OMEGA AI</h1>
                 </div>
                 <div className="fragment-display">
                     DECODED FRAGMENTS: [ {foundFragments.join(' | ')} ]
