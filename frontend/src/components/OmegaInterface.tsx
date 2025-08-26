@@ -61,6 +61,8 @@ const OmegaInterface = () => {
     const [missionComplete, setMissionComplete] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [scanType, setScanType] = useState<string | null>(null); // State for animation
+    const [terminalExpanded, setTerminalExpanded] = useState(false); // <-- NEW state
+
     const inputRef = useRef<HTMLInputElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -68,6 +70,9 @@ const OmegaInterface = () => {
 
     const sendMessage = useCallback(async (messageText: string) => {
         if (!messageText.trim() || isLoading) return;
+
+        // expand terminal after first real command
+        if (!terminalExpanded) setTerminalExpanded(true);
 
         const isUserMessage = !messageText.startsWith('/decode');
         if (isUserMessage) {
@@ -104,7 +109,7 @@ const OmegaInterface = () => {
         } finally {
             setScanType(null); // Hide animation after response
         }
-    }, [isLoading, sessionId, scanType]);
+    }, [isLoading, sessionId, scanType, terminalExpanded]);
     
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -126,9 +131,9 @@ const OmegaInterface = () => {
     return (
         <>
             <ScanningAnimation scanType={scanType} />
-            <div className="omega-interface">
+            <div className={`omega-interface ${terminalExpanded ? 'expanded' : ''}`}>
                 <div className="omega-header">
-                    <h1>OMEGA AI</h1>
+                    <h1 className={terminalExpanded ? 'shrunk' : ''}>OMEGA AI</h1>
                 </div>
                 <div className="fragment-display">
                     DECODED FRAGMENTS: [ {foundFragments.join(' | ')} ]
