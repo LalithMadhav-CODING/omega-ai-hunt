@@ -1,25 +1,34 @@
 import { useState, useEffect } from 'react';
 
 const TypingText = ({ text, onComplete }: { text: string, onComplete: () => void }) => {
-    const [displayedText, setDisplayedText] = useState('');
+    const [displayedChars, setDisplayedChars] = useState<string[]>([]);
 
     useEffect(() => {
-        setDisplayedText(''); // Reset on new text
+        setDisplayedChars([]); // Reset on new text
         let i = 0;
         const intervalId = setInterval(() => {
             if (i < text.length) {
-                setDisplayedText(prev => prev + text.charAt(i));
+                const char = text.charAt(i);
+                // Push <br/> instead of raw "\n"
+                setDisplayedChars(prev => [...prev, char === '\n' ? '\n' : char]);
                 i++;
             } else {
                 clearInterval(intervalId);
-                onComplete(); // Notify the parent component that typing is finished
+                onComplete();
             }
-        }, 30); // Adjust typing speed here (milliseconds)
+        }, 30); // typing speed
 
         return () => clearInterval(intervalId);
     }, [text, onComplete]);
 
-    return <span>{displayedText}<span className="typing-cursor">_</span></span>;
+    return (
+        <span>
+            {displayedChars.map((char, idx) =>
+                char === '\n' ? <br key={idx} /> : <span key={idx}>{char}</span>
+            )}
+            <span className="typing-cursor">_</span>
+        </span>
+    );
 };
 
 export default TypingText;
