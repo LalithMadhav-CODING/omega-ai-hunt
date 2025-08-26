@@ -19,7 +19,7 @@ const LoginForm = () => {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (username === 'agent' && password === 'omega') {
+        if (username === 'Agent-007' && password === 'omega') {
             setError('');
             // Trigger the transition event
             const event = new CustomEvent('startTransition', { detail: '/chat' });
