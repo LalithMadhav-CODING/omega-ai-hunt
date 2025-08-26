@@ -1,36 +1,111 @@
-:root {
-  --background-color: #1a1a1a; /* Deep charcoal */
-  --text-color: #00e5e5;       /* Cool teal/cyan */
-  --accent-color: #ff9900;     /* Warning amber/orange */
-  --border-color: rgba(0, 229, 229, 0.3);
-  --font-family: 'Share Tech Mono', monospace;
+/* --- Font Definition --- */
+@font-face {
+  font-family: 'Aquire';
+  src: url('/fonts/Aquire-BW0ox.otf') format('opentype'); /* Adjust filename if different */
+  font-weight: normal;
+  font-style: normal;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+/* --- Global Styles --- */
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  font-family: var(--font-family);
+  background-color: #1a1a1a;
+  color: #00e5e5;
+  font-family: 'Share Tech Mono', monospace;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Styles for the main interface */
+/* --- Login Screen Styles --- */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+}
+
+.login-form {
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.omega-seal {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 2rem;
+  color: #00e5e5;
+  opacity: 0.7;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.input-group label {
+  flex-basis: 100px;
+  text-align: right;
+  margin-right: 1rem;
+  font-size: 1.1rem;
+}
+
+.input-group input {
+  flex-grow: 1;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 229, 229, 0.3);
+  color: #00e5e5;
+  padding: 0.75rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem;
+}
+
+.login-button {
+  background-color: transparent;
+  border: 1px solid #ff9900;
+  color: #ff9900;
+  padding: 0.75rem 2rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.login-button:hover {
+  background-color: #ff9900;
+  color: #1a1a1a;
+}
+
+.error-message {
+    color: #ff4d4d;
+    margin-top: 1rem;
+    height: 1.2em;
+}
+
+
+/* --- Chat Interface Styles --- */
 .omega-interface {
   width: 90%;
   max-width: 800px;
   height: 85vh;
-  border: 1px solid var(--border-color);
-  background: radial-gradient(circle, rgba(0, 43, 43, 0.2) 0%, rgba(26, 26, 26, 0.1) 70%);
+  border: 1px solid rgba(0, 229, 229, 0.3);
+  /* FIX: Added solid background color */
+  background-color: #1a1a1a; 
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -38,14 +113,559 @@ body {
 
 .omega-header {
   text-align: center;
-  color: var(--accent-color);
-  border-bottom: 1px solid var(--border-color);
+  color: #ff9900;
+  border-bottom: 1px solid rgba(0, 229, 229, 0.3);
   padding-bottom: 1rem;
   margin-bottom: 1rem;
-  letter-spacing: 3px;
+  letter-spacing: 5px;
+  font-family: 'Aquire', sans-serif; /* Using the new font */
+  font-size: 2rem;
 }
 
 .omega-content {
   flex-grow: 1;
-  font-size: 1.1rem;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.omega-content p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.omega-input-area {
+    display: flex;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(0, 229, 229, 0.3);
+    padding-top: 1rem;
+}
+
+.omega-input-area input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #00e5e5;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+}
+
+.omega-input-area input:focus {
+    outline: none;
+}
+
+.omega-input-area button {
+    background: transparent;
+    border: 1px solid #00e5e5;
+    color: #00e5e5;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-family: 'Aquire', sans-serif;
+    letter-spacing: 2px;
+    font-size: 1rem;
+}
+
+.omega-input-area button:hover {
+    background-color: #00e5e5;
+    color: #1a1a1a;
+}
+
+.omega-input-area button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Matrix Background --- */
+#matrix-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* --- Transition Screen Styles --- */
+.transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+.transition-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.glitch-text {
+  font-size: 2.5rem;
+  color: #ff9900;
+  text-align: center;
+  animation: glitch 1.5s linear infinite;
+}
+
+@keyframes glitch {
+  2%,64%{
+    transform: translate(2px,0) skew(0deg);
+  }
+  4%,60%{
+    transform: translate(-2px,0) skew(0deg);
+  }
+  62%{
+    transform: translate(0,0) skew(5deg); 
+  }
+}
+
+.glitch-text:before,
+.glitch-text:after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch-text:before {
+  left: 2px;
+  text-shadow: -2px 0 #00e5e5;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch-text:after {
+  left: -2px;
+  text-shadow: -2px 0 #ff4d4d, 2px 2px #00e5e5;
+  clip: rect(85px, 450px, 90px, 0);
+  animation: glitch-anim-2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(42px, 9999px, 44px, 0); }
+  /* ... add more steps for a more complex glitch ... */
+  100% { clip: rect(5px, 9999px, 92px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip: rect(78px, 9999px, 100px, 0); }
+  /* ... add more steps for a more complex glitch ... */
+  100% { clip: rect(40px, 9999px, 62px, 0); }
+}
+
+/* --- Puzzle UI Styles --- */
+.fragment-display {
+    color: #00e5e5;
+    border-top: 1px solid rgba(0, 229, 229, 0.3);
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    min-height: 1.5em;
+    text-align: center;
+}
+
+.unlock-console {
+    border: 1px solid #ff9900;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #ff9900;
+    text-align: center;
+}
+
+.mission-complete-message {
+    border: 1px solid #00e5e5;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #00e5e5;
+    text-align: center;
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 229, 229, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 10px 20px rgba(0, 229, 229, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 229, 229, 0);
+    }
+}
+
+/* --- Puzzle UI Styles --- */
+.fragment-display {
+    color: #00e5e5;
+    border-top: 1px solid rgba(0, 229, 229, 0.3);
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    min-height: 1.2em;
+}
+
+.unlock-console {
+    border: 1px solid #ff9900;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #ff9900;
+    text-align: center;
+}
+
+.mission-complete-message {
+    border: 1px solid #00e5e5;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #00e5e5;
+    text-align: center;
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 229, 229, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 10px 20px rgba(0, 229, 229, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 229, 229, 0);
+    }
+}
+
+/* --- Hint Box Styles --- */
+.hint-box {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 153, 0, 0.1);
+    border: 1px solid rgba(255, 153, 0, 0.5);
+    cursor: pointer;
+    z-index: 2000;
+}
+
+.glitch-hint {
+    color: rgba(255, 153, 0, 0.8);
+    font-size: 1rem;
+    letter-spacing: 2px;
+    position: relative;
+    animation: glitch-subtle 2s linear infinite;
+}
+
+@keyframes glitch-subtle {
+    0% { transform: translate(0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(-1px, -1px); }
+    60% { transform: translate(1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    100% { transform: translate(0); }
+}
+
+.glitch-hint:before,
+.glitch-hint:after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+}
+
+.glitch-hint:before {
+    left: 1px;
+    text-shadow: -1px 0 #ff4d4d;
+    animation: noise-anim-1 2s linear infinite alternate-reverse;
+}
+
+.glitch-hint:after {
+    left: -1px;
+    text-shadow: -1px 0 #00e5e5;
+    animation: noise-anim-2 3s linear infinite alternate-reverse;
+}
+
+@keyframes noise-anim-1 {
+    0% { clip-path: inset(5% 0 90% 0); }
+    20% { clip-path: inset(80% 0 5% 0); }
+    40% { clip-path: inset(45% 0 45% 0); }
+    60% { clip-path: inset(20% 0 70% 0); }
+    80% { clip-path: inset(95% 0 2% 0); }
+    100% { clip-path: inset(60% 0 30% 0); }
+}
+
+@keyframes noise-anim-2 {
+    0% { clip-path: inset(90% 0 5% 0); }
+    20% { clip-path: inset(10% 0 85% 0); }
+    40% { clip-path: inset(55% 0 35% 0); }
+    60% { clip-path: inset(5% 0 80% 0); }
+    80% { clip-path: inset(85% 0 10% 0); }
+    100% { clip-path: inset(40% 0 50% 0); }
+}
+
+/* --- Decoder Styles --- */
+.decoder-box {
+    border-top: 1px solid rgba(255, 153, 0, 0.5);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.decoder-box label {
+    display: block;
+    text-align: center;
+    margin-bottom: 0.7rem;
+    color: #ff9900;
+    letter-spacing: 3px;
+    font-family: 'Aquire', sans-serif;
+}
+
+.decoder-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.decoder-input-group input {
+    flex-grow: 1;
+    background-color: #000;
+    border: 1px solid rgba(255, 153, 0, 0.5);
+    color: #ff9900;
+    padding: 0.5rem;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.decoder-input-group button {
+    background-color: transparent;
+    border: 1px solid #ff9900;
+    color: #ff9900;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-family: 'Aquire', sans-serif;
+}
+
+.loading-bar-container {
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255, 153, 0, 0.2);
+    margin-top: 0.5rem;
+}
+
+.loading-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #ff9900;
+    transition: width 0.5s ease-out;
+}
+/* --- Scrollbar Hiding --- */
+.omega-content::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+.omega-content {
+  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  scrollbar-width: none;  /* For Firefox */
+}
+
+
+/* --- Typing Animation Styles --- */
+.typing-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* --- Scanning Animation Styles --- */
+.scanning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(26, 26, 26, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    color: #ff9900;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.scanning-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.scanning-icon {
+    width: 150px;
+    height: 150px;
+    animation: pulse-scan 2s infinite;
+}
+
+.scanning-icon .ring {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: draw-ring 2s infinite linear;
+}
+
+.scanning-text {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+    animation: flicker 1.5s infinite;
+}
+
+@keyframes pulse-scan {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+@keyframes draw-ring {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* --- Other styles (login, animations, etc.) will also use the new font where appropriate --- */
+.login-button, .glitch-text, .scanning-text {
+    font-family: 'Aquire', sans-serif;
+}
+
+/* --- Cyberpunk Title (Omega AI) --- */
+.omega-header {
+  text-align: center;
+  color: #00ff41; /* Neon green */
+  border-bottom: 2px solid rgba(0, 255, 65, 0.5);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  letter-spacing: 6px;
+  font-family: 'Aquire', sans-serif;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+
+  /* Neon glow */
+  text-shadow: 
+    0 0 5px #00ff41,
+    0 0 10px #00ff41,
+    0 0 20px #00ff41,
+    0 0 40px #00ff41;
+
+  /* Random burst flicker */
+  animation: cyber-flicker 6s infinite;
+}
+
+@keyframes cyber-flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+    text-shadow: 
+      0 0 5px #00ff41,
+      0 0 10px #00ff41,
+      0 0 20px #00ff41,
+      0 0 40px #00ff41;
+    transform: translate(0,0);
+  }
+  19%, 24%, 55% {
+    opacity: 0.6;
+    filter: brightness(0.6);
+    text-shadow: none;
+  }
+  /* glitch burst shake + brightness change */
+  20%, 54% {
+    transform: translate(-1px, 1px);
+    filter: brightness(1.4);
+  }
+  21%, 56% {
+    transform: translate(2px, -2px);
+    filter: brightness(0.8);
+  }
+}
+
+/* --- Glitch Burst Ghost Text --- */
+.omega-header::before,
+.omega-header::after {
+  content: "OMEGA AI";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  clip: rect(0, 900px, 0, 0);
+  opacity: 0; /* invisible unless glitching */
+}
+
+.omega-header::before {
+  text-shadow: -2px 0 #ff004d;
+  animation: glitch-anim-1 6s infinite;
+}
+
+.omega-header::after {
+  text-shadow: 2px 0 #00eaff;
+  animation: glitch-anim-2 6s infinite;
+}
+
+@keyframes glitch-anim-1 {
+  0%, 90%, 100% { opacity: 0; }
+  10%, 11%, 12% { clip: rect(20px, 9999px, 40px, 0); opacity: 1; }
+  30% { clip: rect(60px, 9999px, 80px, 0); opacity: 1; }
+  31% { opacity: 0; }
+  70% { clip: rect(10px, 9999px, 50px, 0); opacity: 1; }
+  71% { opacity: 0; }
+}
+
+@keyframes glitch-anim-2 {
+  0%, 90%, 100% { opacity: 0; }
+  15%, 16% { clip: rect(45px, 9999px, 65px, 0); opacity: 1; }
+  35% { clip: rect(5px, 9999px, 25px, 0); opacity: 1; }
+  36% { opacity: 0; }
+  75% { clip: rect(35px, 9999px, 85px, 0); opacity: 1; }
+  76% { opacity: 0; }
+}
+
+/* Terminal expansion & cinematic header shrink */
+.omega-interface.expanded .omega-content {
+  height: 70vh;         
+  transition: height 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Smooth header shrink + fade */
+.omega-interface.expanded .omega-header h1 {
+  font-size: 1.8rem;
+  opacity: 0.7;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.fragment-display {
+  background-color: #0d0d0d; /* same as terminal bg */
+  padding: 0.4rem 0.6rem;
+  display: inline-block;
+  position: relative;
+  z-index: 2; /* ensures it stays above scrolling text */
 }
