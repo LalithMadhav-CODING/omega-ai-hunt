@@ -133,6 +133,4 @@ To run this project locally, follow these steps:
 
 ### 🎥 Demonstration Video
 
-*(Note: You will need to upload your `Demo.mp4` file to a service like YouTube or Google Drive and replace the placeholder link below with your public URL.)*
-
 **[>> Watch the Demo Video Here <<](https://drive.google.com/file/d/1SWM1n0IOM6LZdklvAoDLRnJXk_vuJqd0/view?usp=drive_link)**
