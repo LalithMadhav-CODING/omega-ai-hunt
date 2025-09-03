@@ -63,23 +63,24 @@ const shuffleArray = <T>(array: T[]): T[] => {
 export const getShuffledCommands = (): string[] => {
     const missionCommands = Object.values(puzzleChains).flatMap(chain => chain.steps.map(step => step.command));
     const systemCommands = ['/unlock [sequence]', '/decode [fragment]', '/help'];
-    // FIX: Use Array.from() for compatibility with older TS targets
     return shuffleArray(Array.from(new Set([...missionCommands, ...systemCommands])));
 };
 
-
-// --- Session Management (no changes needed here) ---
-interface UserSession {
+// --- Session Management ---
+export interface UserSession {
   foundFragments: Set<string>;
   puzzleProgress: { [key: string]: number };
+  memory: { facts: Record<string, string> }; // ✅ NEW memory
 }
+
 const userSessions = new Map<string, UserSession>();
 
-const ensureSession = (sessionId: string) => {
+const ensureSession = (sessionId: string): UserSession => {
   if (!userSessions.has(sessionId)) {
     userSessions.set(sessionId, {
       foundFragments: new Set(),
-      puzzleProgress: { DECRYPT: 0, PROTOCOL: 0, OMEGA: 0, NOW: 0 }
+      puzzleProgress: { DECRYPT: 0, PROTOCOL: 0, OMEGA: 0, NOW: 0 },
+      memory: { facts: {} }
     });
   }
   return userSessions.get(sessionId)!;
