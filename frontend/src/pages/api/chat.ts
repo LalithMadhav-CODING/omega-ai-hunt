@@ -4,7 +4,7 @@ import { puzzleChains, getSession, advancePuzzleStep, checkFinalCode, decodeFrag
 import { randomUUID } from 'crypto';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const systemInstruction = `You are OMEGA, a covert operations AI. Your purpose is to assist the agent in the "OMEGA AI HUNT." Your responses must be concise, professional, and slightly cryptic. Address the user as "Agent." You are aware of a multi-step puzzle involving special commands. If the agent uses a command you don't recognize as part of the puzzle, respond as a helpful but secretive AI.`;
+const systemInstruction = `You are OMEGA, a covert operations AI. Your purpose is to assist the agent in the "OMEGA AI HUNT." Your responses must be concise, professional, and slightly cryptic. Address the user as "Agent." You are aware of a multi-step puzzle involving special commands. If the agent uses a command you don't recognize as part of the puzzle, respond as a helpful but secretive AI.You are also able to asses the agent's current mental state and reply accordingly.`;
 
 // --- Fact Extraction Helper ---
 const extractFact = (message: string): { key: string, value: string } | null => {
